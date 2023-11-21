@@ -117,6 +117,7 @@ struct nc_ndp_queue {
 #ifdef __KERNEL__
 	struct ndp_subscriber *subscriber;
 #endif
+	uint32_t scratchpad;
 };
 
 #endif

@@ -71,6 +71,7 @@ static inline int nc_ndp_v2_open_queue(struct nc_ndp_queue *q, const void *fdt, 
 	int ret = 0;
 #ifndef __KERNEL__
 	int prot;
+	size_t off;
 	size_t hdr_mmap_size = 0;
 	size_t off_mmap_size = 0;
 	off_t hdr_mmap_offset = 0;
@@ -129,6 +130,13 @@ static inline int nc_ndp_v2_open_queue(struct nc_ndp_queue *q, const void *fdt, 
 		goto err_mmap_off;
 	}
 
+	for (off = 0; off < hdr_mmap_size; off += 4096) {
+		q->scratchpad += *(((const char *) q->u.v2.hdr) + off);
+	}
+	for (off = 0; off < off_mmap_size; off += 4096) {
+		q->scratchpad += *(((const char *) q->u.v2.off) + off);
+	}
+
 	q->u.v2.hdr_items = hdr_mmap_size / 2 / sizeof(struct ndp_v2_packethdr);
 #endif
 	return 0;
@@ -147,6 +155,7 @@ static inline int nc_ndp_v3_open_queue(struct nc_ndp_queue *q, const void *fdt, 
 #ifndef __KERNEL__
 	int prot;
 	int ret = 0;
+	size_t off;
 	size_t hdr_mmap_size = 0;
 	off_t hdr_mmap_offset = 0;
 
@@ -206,6 +215,10 @@ static inline int nc_ndp_v3_open_queue(struct nc_ndp_queue *q, const void *fdt, 
 		return -EBADFD;
 	}
 
+	for (off = 0; off < hdr_mmap_size; off += 4096) {
+		q->scratchpad += *(((const char *) q->u.v3.hdrs) + off);
+	}
+
 	if (q->channel.type == NDP_CHANNEL_TYPE_RX) {
 		q->u.v3.hdr_ptr_mask = ((hdr_mmap_size / 2) / sizeof(struct ndp_v3_packethdr)) - 1; // "- 1" to create a mask for AND operations
 	} else {
@@ -240,6 +253,9 @@ static inline int nc_ndp_queue_open_init_ext(const void *fdt, struct nc_ndp_queu
 	int ctrl_params_offset;
 	int flags = ndp_flags;
 
+#ifndef __KERNEL__
+	size_t off;
+#endif
 	off_t mmap_offset;
 	size_t mmap_size = 0;
 
@@ -304,6 +320,10 @@ static inline int nc_ndp_queue_open_init_ext(const void *fdt, struct nc_ndp_queu
 			MAP_FILE | MAP_SHARED, q->fd, mmap_offset);
 	if (q->buffer == MAP_FAILED) {
 		goto err_mmap;
+	}
+
+	for (off = 0; off < q->size*2; off += 4096) {
+		q->scratchpad += *(((const char *) q->buffer) + off);
 	}
 #endif
 	q->sync.id = q->channel.id;
