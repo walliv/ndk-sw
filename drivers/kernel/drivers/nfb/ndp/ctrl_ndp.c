@@ -38,6 +38,8 @@
 
 #define virt_to_phys_shift(x) (virt_to_phys(x) >> PAGE_SHIFT)
 
+static bool ndp_ctrl_calypte_rx_use_valid_flag = 1;
+
 typedef uint64_t ndp_offset_t;
 
 /* Size of buffer for one packet in ring */
@@ -321,15 +323,19 @@ static uint64_t ndp_ctrl_rx_get_hwptr(struct ndp_channel *channel)
 	hhp = ctrl->c.hhp;
 
 	if (ctrl->c.type == DMA_TYPE_CALYPTE) {
-		struct nc_calypte_hdr *hdr_base;
-		uint32_t hwptr = ctrl->c.hhp;
-		do {
-			hdr_base = ctrl->ts.calypte.hdr_buffer + hwptr;
-			if (hdr_base->valid == 0)
-				break;
-			hwptr++;
-		} while (hwptr < ctrl->hdr_buffer_size * 2);
-		ctrl->c.hhp = hwptr & channel->ptrmask;
+		if (ndp_ctrl_calypte_rx_use_valid_flag) {
+	                struct nc_calypte_hdr *hdr_base;
+			uint32_t hwptr = ctrl->c.hhp;
+			do {
+				hdr_base = ctrl->ts.calypte.hdr_buffer + hwptr;
+				if (hdr_base->valid == 0)
+					break;
+				hwptr++;
+			} while (hwptr < ctrl->hdr_buffer_size * 2);
+			ctrl->c.hhp = hwptr & channel->ptrmask;
+		} else {
+			nc_ndp_ctrl_hhp_update(&ctrl->c);
+		}
 		return ctrl->c.hhp;
 	}
 	nc_ndp_ctrl_hhp_update(&ctrl->c);
@@ -1223,3 +1229,6 @@ struct ndp_channel *ndp_ctrl_v3_create_tx(struct ndp *ndp, int index, int node_o
 
 module_param_cb(ndp_ctrl_buffer_size, &ndp_param_size_ops, &buffer_size, S_IRUGO);
 MODULE_PARM_DESC(ndp_ctrl_buffer_size, "Size of buffer for one packet in NDP ring (max size of RX/TX packet) [4096]");
+
+module_param(ndp_ctrl_calypte_rx_use_valid_flag, bool, (S_IRUGO | S_IWGRP | S_IWUSR));
+MODULE_PARM_DESC(ndp_ctrl_calypte_rx_use_valid_flag, "Use valid flag instead of reading pointers from DMA Calypte RX controller [yes]");
