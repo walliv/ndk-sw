@@ -93,6 +93,7 @@ struct nc_ndp_queue {
 			uint32_t uspace_mdp;
 			uint32_t uspace_free;
 			uint32_t uspace_acc;
+			unsigned flush;
 #endif
 		} v3;
 	} u;

@@ -327,7 +327,7 @@ static inline void _ndp_queue_tx_sync_v3_us(struct nc_ndp_queue *q)
 
 		uint32_t chlen = (q->u.v3.uspace_hhp - q->u.v3.uspace_shp - 1) & q->u.v3.uspace_mhp;
 		/* TODO: magic number */
-		if (chlen < 512 || q->u.v3.uspace_free <= 4096) {
+		if (q->u.v3.flush || chlen < 512 || q->u.v3.uspace_free <= 4096) {
 			hwpointers = nfb_comp_read64(q->u.v3.comp, NDP_CTRL_REG_HDP);
 			hdp = ((uint32_t)hwpointers);
 			hhp = ((uint32_t)(hwpointers >> 32));
@@ -494,11 +494,19 @@ static inline int nc_ndp_v3_tx_burst_flush(void *priv)
 		q->sync.hwptr = q->u.v3.shp;
 		/* Always request more data (no noeed for real 'unlock all') */
 		q->sync.swptr = (q->u.v3.shp + 64) & q->u.v3.hdr_ptr_mask;
+		if (q->u.v3.flush) {
+			q->sync.swptr = q->u.v3.shp;
+		}
 
 		_ndp_queue_tx_sync_v3_us(q);
 
 		q->u.v3.pkts_available  = (q->sync.swptr - q->sync.hwptr) & (q->u.v3.hdr_ptr_mask);
 		q->u.v3.bytes_available = q->sync.size;
+
+		if (q->u.v3.flush) {
+			q->u.v3.pkts_available = 0;
+			q->u.v3.bytes_available = 0;
+		}
 #endif
 	} else {
 		q->sync.swptr = q->u.v3.shp;

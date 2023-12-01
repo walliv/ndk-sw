@@ -8,6 +8,10 @@
  *   Vladislav Valek <valekv@cesnet.cz>
  */
 
+#ifndef __KERNEL__
+#include <stdlib.h>
+#endif
+
 #include <nfb/ndp.h>
 #include "ndp_priv.h"
 
@@ -228,6 +232,11 @@ static inline int nc_ndp_v3_open_queue(struct nc_ndp_queue *q, const void *fdt, 
 #endif
 
 #ifndef __KERNEL__
+	q->u.v3.flush = 0;
+	if ((dir == 0 && getenv("NFB_NDP_RX_FLUSH")) || (dir != 0 && getenv("NFB_NDP_TX_FLUSH"))) {
+		q->u.v3.flush = 1;
+	}
+
 	if (q->flags & NDP_CHANNEL_FLAG_EXCLUSIVE) {
 		q->u.v3.uspace_hdrs = q->u.v3.hdrs;
 	}
