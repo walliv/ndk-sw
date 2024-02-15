@@ -142,7 +142,7 @@ err_fdt_getprop:
 	return ret;
 }
 
-static inline int nc_ndp_v3_open_queue(struct nc_ndp_queue *q, const void *fdt,  int fdt_offset, int ctrl_offset, int dir)
+static inline int nc_ndp_v3_open_queue(struct nc_ndp_queue *q, const void *fdt,  int fdt_offset, int ctrl_offset)
 {
 #ifndef __KERNEL__
 	int prot;
@@ -312,7 +312,7 @@ static inline int nc_ndp_queue_open_init_ext(const void *fdt, struct nc_ndp_queu
 	q->sync.hwptr = 0;
 
 	if (q->protocol == 3) {
-		ret = nc_ndp_v3_open_queue(q, fdt, fdt_offset, ctrl_offset, dir);
+		ret = nc_ndp_v3_open_queue(q, fdt, fdt_offset, ctrl_offset);
 	} else if (q->protocol == 2) {
 		ret = nc_ndp_v2_open_queue(q, fdt, fdt_offset);
 	} else if (q->protocol == 1) {
