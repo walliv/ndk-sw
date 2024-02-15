@@ -325,9 +325,8 @@ static inline unsigned nc_ndp_v3_rx_burst_get(void *priv, struct ndp_packet *pac
 	__builtin_prefetch(data_base);
 
 	for (i = 0; i < count; i++) {
-		unsigned packet_size;
-		unsigned header_size = 0;
 		struct ndp_v3_packethdr *hdr;
+		unsigned header_size;
 		unsigned char *data;
 
 		hdr = hdr_base + i;
@@ -336,10 +335,7 @@ static inline unsigned nc_ndp_v3_rx_burst_get(void *priv, struct ndp_packet *pac
 			break;
 		}
 
-		if (!(hdr->metadata & NDP_CALYPTE_METADATA_NOT_VALID))
-			header_size = hdr->metadata & NDP_CALYPTE_METADATA_HDR_SIZE_MASK;
-
-		packet_size = le16_to_cpu(hdr->frame_len) - header_size;
+		header_size = hdr->metadata_len;
 
 		data = data_base + hdr->frame_ptr * NDP_RX_CALYPTE_BLOCK_SIZE;
 		/* Assign pointer and length of header */
@@ -350,7 +346,7 @@ static inline unsigned nc_ndp_v3_rx_burst_get(void *priv, struct ndp_packet *pac
 
 		/* Assign pointer and length of data */
 		packets[i].data = data;
-		packets[i].data_length = packet_size;
+		packets[i].data_length = le16_to_cpu(hdr->frame_len) - header_size;
 
 		hdr->valid = 0;
 		q->u.v3.sdp += (hdr->frame_len + NDP_RX_CALYPTE_BLOCK_SIZE - 1) / NDP_RX_CALYPTE_BLOCK_SIZE;

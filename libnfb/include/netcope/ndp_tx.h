@@ -450,13 +450,13 @@ static inline unsigned nc_ndp_v3_tx_burst_get(void *priv, struct ndp_packet *pac
 		}
 
 		/* Write DMA TX header */
-		hdr->metadata = 0;
-		hdr->frame_len = cpu_to_le16(packet_size);
-		hdr->frame_ptr = sdp_int & q->u.v3.data_ptr_mask;
+		hdr->metadata_len = header_size;
+		hdr->frame_len    = packet_size;
+		hdr->frame_ptr    = sdp_int & q->u.v3.data_ptr_mask;
 
 		/* Set pointers, where user can write packet content */
 		packets[i].header = data_base + sdp_int;
-		packets[i].data = data_base + sdp_int + header_size;
+		packets[i].data   = data_base + sdp_int + header_size;
 
 		// Ceil SDP to the multiple of NDP_TX_CALYPTE_BLOCK_SIZE
 		sdp_int = ((sdp_int + packet_size + (NDP_TX_CALYPTE_BLOCK_SIZE -1)) & (~(NDP_TX_CALYPTE_BLOCK_SIZE -1)));

@@ -51,9 +51,6 @@
 #define NDP_CTRL_UPDATE_SIZE    4
 #define NDP_PACKET_HEADER_SIZE  4
 
-#define NDP_CALYPTE_METADATA_NOT_VALID      0x400
-#define NDP_CALYPTE_METADATA_HDR_SIZE_MASK  0xff
-
 #define NDP_TX_CALYPTE_BLOCK_SIZE (32u)
 #define NDP_RX_CALYPTE_BLOCK_SIZE (128u)
 
@@ -95,7 +92,7 @@ struct nc_calypte_hdr {
 	uint16_t frame_ptr;
 	unsigned valid : 1;
 	unsigned reserved: 7;
-	unsigned metadata : 24;
+	unsigned metadata_len : 24;
 } __attribute__((__packed__));
 
 struct nc_ndp_ctrl {

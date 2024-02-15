@@ -29,11 +29,11 @@ struct ndp_v2_offsethdr {
 };
 
 struct ndp_v3_packethdr {
-	__u16 frame_len;        /**< size of the packet */
-	__u16 frame_ptr;        /**< index into the data array */
-	__u8 valid : 1;         /**< bit indicating the validity of the header/packet */
-	unsigned reserved : 7;  /**< bits reserved for future use */
-	unsigned metadata:24;   /**< user metadata */
+	__u16     frame_len;         /**< size of the packet */
+	__u16     frame_ptr;         /**< index into the data array */
+	__u8      valid : 1;         /**< bit indicating the validity of the header/packet */
+	unsigned  reserved : 7;      /**< bits reserved for future use */
+	unsigned  metadata_len :24;  /**<length of user metadata */
 } __attribute((packed));
 
 struct ndp_queue;
