@@ -1,14 +1,14 @@
 # Maintainer: Martin Spinler <spinler@cesnet.cz>
 pkgname=('nfb-framework' 'python-nfb')
-pkgver=6.17.4
+pkgver=6.20.0
 pkgrel=1
 pkgdesc="Software bundle for CESNET NDK firmware platform"
 url='https://github.com/CESNET/ndk-sw'
 license=('BSD')
 arch=('x86_64')
 
-source=("nfb-framework::git+https://github.com/CESNET/ndk-sw.git")
-#source=("nfb-framework"::"git+file://$HOME/ndk/swbase")
+#source=("nfb-framework::git+https://github.com/CESNET/ndk-sw.git")
+source=("nfb-framework"::"git+file://$HOME/projects/ndk-sw")
 md5sums=('SKIP')
 
 pkgver() {
