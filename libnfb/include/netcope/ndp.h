@@ -169,6 +169,13 @@ static inline int nc_ndp_v3_open_queue(struct nc_ndp_queue *q, const void *fdt, 
 	q->u.v3.uspace_free = 0;
 	q->u.v3.uspace_acc = 0;
 
+        q->u.v3.sync_call_cntr = 0;
+        q->u.v3.lock_call_cntr = 0;
+        q->u.v3.req_space_call_cntr = 0;
+        q->u.v3.burst_put_call_cntr = 0;
+        q->u.v3.burst_get_call_cntr = 0;
+        q->u.v3.burst_flush_call_cntr = 0;
+
 	if (q->flags & NDP_CHANNEL_FLAG_EXCLUSIVE) {
 		q->u.v3.comp = nfb_comp_open(q->dev, ctrl_offset);
 		if (q->u.v3.comp == NULL)
@@ -229,6 +236,13 @@ static inline int nc_ndp_v3_close_queue(struct nc_ndp_queue *q)
 	if (q->flags & NDP_CHANNEL_FLAG_EXCLUSIVE) {
 		nfb_comp_close(q->u.v3.comp);
 	}
+
+        //printf("Calls to sync:        %ld\n", q->u.v3.sync_call_cntr);
+        //printf("Calls to lock:        %ld\n", q->u.v3.lock_call_cntr);
+        //printf("Calls to req space:   %ld\n", q->u.v3.req_space_call_cntr);
+        //printf("Calls to burst PUT:   %ld\n", q->u.v3.burst_put_call_cntr);
+        //printf("Calls to burst GET:   %ld\n", q->u.v3.burst_get_call_cntr);
+        //printf("Calls to burst FLUSH: %ld\n", q->u.v3.burst_flush_call_cntr);
 #endif
 	return 0;
 }

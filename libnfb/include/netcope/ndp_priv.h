@@ -93,6 +93,14 @@ struct nc_ndp_queue {
 			uint32_t uspace_mdp;
 			uint32_t uspace_free;
 			uint32_t uspace_acc;
+
+                        // Debug counters
+                        uint64_t sync_call_cntr;
+                        uint64_t lock_call_cntr;
+                        uint64_t req_space_call_cntr;
+                        uint64_t burst_put_call_cntr;
+                        uint64_t burst_get_call_cntr;
+                        uint64_t burst_flush_call_cntr;
 #endif
 		} v3;
 	} u;

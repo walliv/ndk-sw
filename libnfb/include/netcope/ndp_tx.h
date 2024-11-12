@@ -292,6 +292,9 @@ static inline void _ndp_queue_tx_sync_v3_us(struct nc_ndp_queue *q)
 	uint32_t count;
 
 	uint32_t new_hwptr = q->sync.hwptr;
+
+        q->u.v3.sync_call_cntr++;
+
 	{
 		uint32_t i;
 		uint32_t frame_space;
@@ -316,7 +319,7 @@ static inline void _ndp_queue_tx_sync_v3_us(struct nc_ndp_queue *q)
 			/* TODO: magic number */
 			if (q->u.v3.uspace_acc >= 32) {
 				q->u.v3.uspace_acc = 0;
-				nfb_comp_write64(q->u.v3.comp, NDP_CTRL_REG_SDP, q->u.v3.uspace_sdp | (((uint64_t) q->u.v3.uspace_shp) << 32));
+				//nfb_comp_write64(q->u.v3.comp, NDP_CTRL_REG_SDP, q->u.v3.uspace_sdp | (((uint64_t) q->u.v3.uspace_shp) << 32));
 			}
 		}
 	}
@@ -364,6 +367,8 @@ static inline void nc_ndp_v3_tx_lock(void *priv)
 	signed offset;
 	int lock_valid = q->sync.swptr == q->sync.hwptr ? 0 : 1;
 
+        q->u.v3.lock_call_cntr++;
+
 	// This assignment allows to determine the amount of free headers in the buffer
 	q->sync.swptr = (q->sync.hwptr - 1) & (q->u.v3.hdr_ptr_mask);
 
@@ -387,6 +392,8 @@ static inline void nc_ndp_v3_tx_lock(void *priv)
 
 static inline int nc_ndp_v3_tx_request_space(struct nc_ndp_queue *q, uint32_t shp)
 {
+        q->u.v3.req_space_call_cntr++;
+
 	q->sync.hwptr = shp;
 	if (q->flags & NDP_CHANNEL_FLAG_USERSPACE) {
 		_ndp_queue_tx_sync_v3_us(q);
@@ -410,6 +417,8 @@ static inline unsigned nc_ndp_v3_tx_burst_get(void *priv, struct ndp_packet *pac
 
 	// Iterator pointers
 	uint32_t sdp_int;
+
+        q->u.v3.burst_get_call_cntr++;
 
 	// All previously reserved packets need to be sent before new reservation takes place
 	if (unlikely(q->u.v3.pkts_to_send != 0))
@@ -478,6 +487,8 @@ static inline int nc_ndp_v3_tx_burst_flush(void *priv)
 {
 	struct nc_ndp_queue *q = (struct nc_ndp_queue*) priv;
 
+        q->u.v3.burst_flush_call_cntr++;
+
 	if (q->u.v3.shp >= (q->u.v3.hdr_ptr_mask +1)) {
 		q->u.v3.shp  -= (q->u.v3.hdr_ptr_mask + 1);
 		q->u.v3.hdrs -= (q->u.v3.hdr_ptr_mask + 1);
@@ -522,6 +533,7 @@ static inline int nc_ndp_v3_tx_burst_put(void *priv)
 	struct ndp_v3_packethdr *hdr = q->u.v3.hdrs - q->u.v3.pkts_to_send;
 	uint32_t shp = q->u.v3.shp - q->u.v3.pkts_to_send;
 
+        q->u.v3.burst_put_call_cntr++;
 
 	for (i = 0; i < q->u.v3.pkts_to_send; i++) {
 

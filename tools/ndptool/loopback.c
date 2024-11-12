@@ -163,7 +163,7 @@ static int ndp_mode_loopback_loop(struct ndp_tool_params *p)
 		update_stats(packets_rx, cnt_rx, si);
 
 		if (cnt_rx == 0) {
-			ndp_tx_burst_flush(tx);
+			//ndp_tx_burst_flush(tx);
 			if (p->use_delay_nsec)
 				delay_nsecs(1);
 			continue;
